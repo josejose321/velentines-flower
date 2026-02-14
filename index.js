@@ -7,7 +7,7 @@ function bouquet() {
     sparkles: [],
     sparkleId: 0,
     name: new URLSearchParams(window.location.search).get('name') || '',
-
+    // JOSEEEEE
     init() {
       this.createStemsAndRoses();
       this.createBabysBreath();
