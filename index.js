@@ -6,16 +6,15 @@ function bouquet() {
     floatingHearts: [],
     sparkles: [],
     sparkleId: 0,
-    name: new URLSearchParams(window.location.search).get('name') || 'Marie Del Torrente',
+    name: new URLSearchParams(window.location.search).get('name') || '',
 
     init() {
-      this.createRoses();
-      this.createStems();
+      this.createStemsAndRoses();
       this.createBabysBreath();
       this.createFloatingHearts();
     },
 
-    createRoses() {
+    createStemsAndRoses() {
       const roseColors = [
         { colorOuter: '#C41E3A', colorMid: '#D94255', colorInner: '#E8556D', colorCenter: '#8B0A1A', colorDeep: '#6B0515' },
         { colorOuter: '#E8556D', colorMid: '#F06E82', colorInner: '#F78DA7', colorCenter: '#C41E3A', colorDeep: '#9B1228' },
@@ -31,55 +30,63 @@ function bouquet() {
         { colorOuter: '#E86880', colorMid: '#F08898', colorInner: '#F4A8B8', colorCenter: '#CC4860', colorDeep: '#AA3850' },
       ];
 
-      // 12 roses arranged in 4 rows: 2 top, 3 upper-mid, 4 mid, 3 bottom
-      const positions = [
-        // Top row (2)
-        { x: -25, y: 60 },  { x: 30, y: 55 },
-        // Upper-mid row (3)
-        { x: -70, y: 95 },  { x: 0, y: 85 },   { x: 65, y: 95 },
-        // Mid row (4)
-        { x: -105, y: 135 }, { x: -40, y: 125 }, { x: 35, y: 120 }, { x: 100, y: 138 },
-        // Lower row (3)
-        { x: -80, y: 168 }, { x: -10, y: 160 }, { x: 65, y: 170 },
-      ];
-
-      this.roses = positions.map((pos, i) => ({
-        ...pos,
-        ...roseColors[i % roseColors.length],
-      }));
-    },
-
-    createStems() {
+      // All 12 stems fan out from the same center point (offsetX: 0)
+      // Stems are positioned via CSS: bottom:120px, left: calc(50% + offsetX)
+      // transform-origin: bottom center, rotated by angle
       const stemData = [
-        // Top row stems
-        { height: 310, angle: -6,  offsetX: -25, leaf: true,  leafSide: 'left',  leafPos: 45 },
-        { height: 315, angle: 5,   offsetX: 30,  leaf: true,  leafSide: 'right', leafPos: 50 },
-        // Upper-mid row stems
-        { height: 280, angle: -18, offsetX: -70, leaf: true,  leafSide: 'left',  leafPos: 40 },
-        { height: 290, angle: -2,  offsetX: 0,   leaf: true,  leafSide: 'right', leafPos: 55 },
-        { height: 280, angle: 16,  offsetX: 65,  leaf: true,  leafSide: 'right', leafPos: 38 },
-        // Mid row stems
-        { height: 245, angle: -28, offsetX: -105, leaf: false },
-        { height: 255, angle: -12, offsetX: -40,  leaf: true, leafSide: 'left',  leafPos: 50 },
-        { height: 260, angle: 10,  offsetX: 35,   leaf: false },
-        { height: 240, angle: 26,  offsetX: 100,  leaf: true, leafSide: 'right', leafPos: 42 },
-        // Lower row stems
-        { height: 215, angle: -22, offsetX: -80, leaf: true,  leafSide: 'left',  leafPos: 48 },
-        { height: 220, angle: -4,  offsetX: -10, leaf: false },
-        { height: 210, angle: 18,  offsetX: 65,  leaf: true,  leafSide: 'right', leafPos: 45 },
+        // Center tall stems
+        { height: 345, angle: -2,   offsetX: 0, leaf: true,  leafSide: 'right', leafPos: 50 },
+        { height: 338, angle: 6,    offsetX: 0, leaf: true,  leafSide: 'left',  leafPos: 45 },
+        // Second ring
+        { height: 315, angle: -11,  offsetX: 0, leaf: true,  leafSide: 'left',  leafPos: 40 },
+        { height: 320, angle: -6,   offsetX: 0, leaf: true,  leafSide: 'left',  leafPos: 55 },
+        { height: 310, angle: 13,   offsetX: 0, leaf: true,  leafSide: 'right', leafPos: 48 },
+        // Third ring
+        { height: 285, angle: -20,  offsetX: 0, leaf: true,  leafSide: 'left',  leafPos: 42 },
+        { height: 290, angle: -14,  offsetX: 0, leaf: false },
+        { height: 280, angle: 18,   offsetX: 0, leaf: true,  leafSide: 'right', leafPos: 38 },
+        { height: 275, angle: 24,   offsetX: 0, leaf: true,  leafSide: 'right', leafPos: 50 },
+        // Outer ring
+        { height: 260, angle: -28,  offsetX: 0, leaf: true,  leafSide: 'left',  leafPos: 48 },
+        { height: 248, angle: 30,   offsetX: 0, leaf: false },
+        { height: 255, angle: -34,  offsetX: 0, leaf: true,  leafSide: 'left',  leafPos: 45 },
       ];
+
       this.stems = stemData;
+
+      // Calculate where each stem tip lands
+      // Bouquet container: width=600, height=700
+      // Stem base: bottom=120 → baseY = 700 - 120 = 580 (from top)
+      // Stem baseX: 300 + offsetX (center of 600px bouquet)
+      const baseY = 700 - 120;
+      const centerX = 300;
+
+      this.roses = stemData.map((stem, i) => {
+        const rad = (stem.angle * Math.PI) / 180;
+        const baseX = centerX + stem.offsetX;
+        // Stem tip: grows upward from base, rotated by angle
+        const tipX = baseX + Math.sin(rad) * stem.height;
+        const tipY = baseY - Math.cos(rad) * stem.height;
+
+        // Convert to the coordinate system used in the HTML template:
+        //   left: calc(50% + ${rose.x}px - 35px)  → x is offset from center
+        //   top: ${rose.y}px
+        return {
+          x: tipX - centerX,
+          y: tipY - 35, // center the 70px rose on the tip
+          ...roseColors[i % roseColors.length],
+        };
+      });
     },
 
     createBabysBreath() {
-      const positions = [
-        { x: -130, y: 115 }, { x: -100, y: 80 }, { x: 95, y: 85 },
-        { x: 130, y: 120 },  { x: -60, y: 55 },  { x: 55, y: 50 },
-        { x: -120, y: 170 }, { x: 125, y: 175 },  { x: 0, y: 45 },
-        { x: -40, y: 100 },  { x: 45, y: 105 },   { x: -85, y: 155 },
-        { x: 80, y: 160 },   { x: -15, y: 185 },  { x: 110, y: 150 },
+      this.babysBreath = [
+        { x: -140, y: 110 }, { x: -110, y: 75 },  { x: 105, y: 80 },
+        { x: 140, y: 115 },  { x: -65, y: 50 },   { x: 60, y: 45 },
+        { x: -125, y: 165 }, { x: 130, y: 170 },   { x: 5, y: 38 },
+        { x: -45, y: 95 },   { x: 50, y: 100 },    { x: -90, y: 150 },
+        { x: 85, y: 155 },   { x: -20, y: 180 },   { x: 115, y: 145 },
       ];
-      this.babysBreath = positions;
     },
 
     createFloatingHearts() {
