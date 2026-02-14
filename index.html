@@ -1,635 +1,219 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Valentine's Bouquet</title>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.13.3/cdn.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --rose-deep: #8B0A1A;
-    --rose-mid: #C41E3A;
-    --rose-light: #E8556D;
-    --rose-blush: #F4A0B0;
-    --rose-pale: #FDE2E8;
-    --petal-pink: #F78DA7;
-    --gold: #D4A843;
-    --gold-light: #E8C872;
-    --cream: #FFF8F0;
-    --green-dark: #2D5A27;
-    --green-mid: #4A8C3F;
-    --green-light: #6DB85A;
-    --brown: #5C3A1E;
-  }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Balentayns</title>
+    <script
+      defer
+      src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.13.3/cdn.min.js"
+    ></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap"
+      rel="stylesheet"
+    />
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+    <link rel="stylesheet" href="./index.css" />
+    <script src="./index.js"></script>
+  </head>
+  <body>
+    <div x-data="bouquet()" x-init="init()" class="scene">
+      <!-- Background glow -->
+      <div class="glow"></div>
 
-  body {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: radial-gradient(ellipse at 30% 20%, #2a0a10 0%, #1a0508 40%, #0d0204 100%);
-    overflow: hidden;
-    font-family: 'Cormorant Garamond', serif;
-  }
+      <!-- Floating hearts -->
+      <template x-for="heart in floatingHearts" :key="heart.id">
+        <div
+          class="floating-heart"
+          :style="`left: ${heart.x}%; animation-duration: ${heart.duration}s; animation-delay: ${heart.delay}s; font-size: ${heart.size}rem;`"
+        >
+          ♥
+        </div>
+      </template>
 
-  .scene {
-    position: relative;
-    width: 700px;
-    height: 850px;
-  }
+      <!-- Greeting -->
+      <div class="greeting">
+        <h1>Happy Valentine's Day </h1>
+        <p><span x-text="name"></span></p>
+      </div>
 
-  /* Floating hearts background */
-  .floating-heart {
-    position: fixed;
-    color: var(--rose-deep);
-    opacity: 0;
-    font-size: 1.2rem;
-    animation: floatUp linear infinite;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  @keyframes floatUp {
-    0% { transform: translateY(100vh) rotate(0deg) scale(0.5); opacity: 0; }
-    10% { opacity: 0.3; }
-    90% { opacity: 0.15; }
-    100% { transform: translateY(-10vh) rotate(360deg) scale(1); opacity: 0; }
-  }
-
-  /* Greeting text */
-  .greeting {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    text-align: center;
-    z-index: 10;
-    width: 100%;
-  }
-
-  .greeting h1 {
-    font-family: 'Playfair Display', serif;
-    font-weight: 700;
-    font-style: italic;
-    font-size: 3.2rem;
-    background: linear-gradient(135deg, var(--rose-light), var(--gold-light), var(--rose-blush));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    letter-spacing: 2px;
-    text-shadow: none;
-    filter: drop-shadow(0 2px 10px rgba(196, 30, 58, 0.3));
-    opacity: 0;
-    animation: fadeSlideDown 1.5s ease-out 0.5s forwards;
-  }
-
-  .greeting p {
-    font-family: 'Cormorant Garamond', serif;
-    font-style: italic;
-    font-size: 1.3rem;
-    color: var(--rose-blush);
-    margin-top: 8px;
-    letter-spacing: 4px;
-    text-transform: uppercase;
-    opacity: 0;
-    animation: fadeSlideDown 1.5s ease-out 1s forwards;
-  }
-
-  @keyframes fadeSlideDown {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  /* Bouquet container */
-  .bouquet {
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 600px;
-    height: 700px;
-  }
-
-  /* Wrapper / paper */
-  .wrapper {
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 320px;
-    height: 280px;
-    z-index: 5;
-  }
-
-  .wrapper-shape {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: 100%;
-    clip-path: polygon(15% 0%, 85% 0%, 100% 100%, 0% 100%);
-    background: linear-gradient(180deg, var(--cream) 0%, #f0e0d0 60%, #e0cbb8 100%);
-    border-radius: 0 0 10px 10px;
-    opacity: 0;
-    animation: wrapperReveal 1s ease-out 0.3s forwards;
-  }
-
-  .wrapper-fold {
-    position: absolute;
-    bottom: 0;
-    left: 10%;
-    width: 80%;
-    height: 70%;
-    clip-path: polygon(10% 0%, 90% 0%, 100% 100%, 0% 100%);
-    background: linear-gradient(180deg, rgba(255,248,240,0.9), rgba(240,224,208,0.8));
-    z-index: 1;
-    opacity: 0;
-    animation: wrapperReveal 1s ease-out 0.5s forwards;
-  }
-
-  .wrapper-ribbon {
-    position: absolute;
-    top: 45%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 200px;
-    height: 30px;
-    z-index: 3;
-  }
-
-  .ribbon-bow {
-    position: absolute;
-    top: -15px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 80px;
-    height: 40px;
-  }
-
-  .ribbon-bow::before, .ribbon-bow::after {
-    content: '';
-    position: absolute;
-    top: 5px;
-    width: 35px;
-    height: 25px;
-    background: var(--rose-mid);
-    border-radius: 50% 50% 50% 50%;
-  }
-
-  .ribbon-bow::before { left: 2px; transform: rotate(-15deg); }
-  .ribbon-bow::after { right: 2px; transform: rotate(15deg); }
-
-  .ribbon-center {
-    position: absolute;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 14px;
-    height: 14px;
-    background: var(--rose-deep);
-    border-radius: 50%;
-    z-index: 1;
-  }
-
-  .ribbon-band {
-    position: absolute;
-    top: 12px;
-    left: 0;
-    width: 100%;
-    height: 10px;
-    background: linear-gradient(90deg, transparent 0%, var(--rose-mid) 20%, var(--rose-deep) 50%, var(--rose-mid) 80%, transparent 100%);
-    border-radius: 2px;
-  }
-
-  @keyframes wrapperReveal {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  /* Stems */
-  .stem {
-    position: absolute;
-    bottom: 120px;
-    left: 50%;
-    width: 4px;
-    background: linear-gradient(to top, var(--green-dark), var(--green-mid));
-    border-radius: 2px;
-    transform-origin: bottom center;
-    z-index: 2;
-    opacity: 0;
-    animation: stemGrow 0.8s ease-out forwards;
-  }
-
-  @keyframes stemGrow {
-    from { opacity: 0; height: 0 !important; }
-    to { opacity: 1; }
-  }
-
-  /* Leaves */
-  .leaf {
-    position: absolute;
-    width: 30px;
-    height: 15px;
-    background: var(--green-mid);
-    border-radius: 0 80% 0 80%;
-    z-index: 3;
-  }
-
-  .leaf.right {
-    border-radius: 80% 0 80% 0;
-  }
-
-  /* Rose flower */
-  .flower {
-    position: absolute;
-    z-index: 4;
-    opacity: 0;
-    transform: scale(0);
-    animation: bloomIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-  }
-
-  @keyframes bloomIn {
-    from { opacity: 0; transform: scale(0) rotate(-30deg); }
-    to { opacity: 1; transform: scale(1) rotate(0deg); }
-  }
-
-  .rose {
-    position: relative;
-    width: 70px;
-    height: 70px;
-  }
-
-  .petal-layer {
-    position: absolute;
-    border-radius: 50%;
-    transition: transform 0.5s ease;
-  }
-
-  .rose:hover .petal-layer { transform: scale(1.05); }
-
-  /* Sparkle particles */
-  .sparkle {
-    position: absolute;
-    width: 4px;
-    height: 4px;
-    background: var(--gold-light);
-    border-radius: 50%;
-    opacity: 0;
-    animation: sparkleAnim 2s ease-in-out infinite;
-    pointer-events: none;
-    z-index: 20;
-  }
-
-  @keyframes sparkleAnim {
-    0%, 100% { opacity: 0; transform: scale(0); }
-    50% { opacity: 1; transform: scale(1); }
-  }
-
-  /* Glow effect behind bouquet */
-  .glow {
-    position: absolute;
-    bottom: 100px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 400px;
-    height: 400px;
-    background: radial-gradient(circle, rgba(196,30,58,0.15) 0%, transparent 70%);
-    z-index: 0;
-    animation: glowPulse 3s ease-in-out infinite;
-  }
-
-  @keyframes glowPulse {
-    0%, 100% { opacity: 0.6; transform: translateX(-50%) scale(1); }
-    50% { opacity: 1; transform: translateX(-50%) scale(1.1); }
-  }
-
-  /* Message card */
-  .message-card {
-    position: absolute;
-    bottom: 60px;
-    right: 30px;
-    width: 140px;
-    padding: 14px;
-    background: var(--cream);
-    border-radius: 4px;
-    box-shadow: 2px 4px 15px rgba(0,0,0,0.3);
-    transform: rotate(8deg);
-    z-index: 10;
-    opacity: 0;
-    animation: cardSlide 1s ease-out 2.5s forwards;
-  }
-
-  .message-card p {
-    font-family: 'Playfair Display', serif;
-    font-style: italic;
-    font-size: 0.85rem;
-    color: var(--rose-deep);
-    line-height: 1.5;
-    text-align: center;
-  }
-
-  .message-card .heart-icon {
-    text-align: center;
-    font-size: 1.2rem;
-    margin-top: 5px;
-    animation: heartBeat 1.2s ease-in-out infinite 3s;
-  }
-
-  @keyframes cardSlide {
-    from { opacity: 0; transform: rotate(8deg) translateX(30px); }
-    to { opacity: 1; transform: rotate(8deg) translateX(0); }
-  }
-
-  @keyframes heartBeat {
-    0%, 100% { transform: scale(1); }
-    15% { transform: scale(1.25); }
-    30% { transform: scale(1); }
-    45% { transform: scale(1.15); }
-    60% { transform: scale(1); }
-  }
-
-  /* Interactive hint */
-  .hint {
-    position: absolute;
-    bottom: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-family: 'Cormorant Garamond', serif;
-    font-style: italic;
-    font-size: 0.85rem;
-    color: rgba(244,160,176,0.5);
-    letter-spacing: 2px;
-    opacity: 0;
-    animation: fadeSlideDown 1.5s ease-out 3.5s forwards;
-  }
-
-  /* SVG Rose component */
-  svg.rose-svg {
-    overflow: visible;
-    filter: drop-shadow(0 3px 6px rgba(0,0,0,0.25));
-    transition: transform 0.4s ease, filter 0.4s ease;
-    cursor: pointer;
-  }
-
-  svg.rose-svg:hover {
-    transform: scale(1.08);
-    filter: drop-shadow(0 5px 15px rgba(196,30,58,0.4));
-  }
-
-  /* Baby's breath */
-  .babys-breath {
-    position: absolute;
-    z-index: 3;
-    opacity: 0;
-    animation: bloomIn 0.6s ease-out forwards;
-  }
-
-  .tiny-flower {
-    width: 8px;
-    height: 8px;
-    background: white;
-    border-radius: 50%;
-    position: absolute;
-    box-shadow: 0 0 6px rgba(255,255,255,0.5);
-  }
-
-  @media (max-width: 640px) {
-    .scene { transform: scale(0.65); transform-origin: center center; }
-    .greeting h1 { font-size: 2.2rem; }
-  }
-</style>
-</head>
-<body>
-
-<div x-data="bouquet()" x-init="init()" class="scene">
-  
-  <!-- Background glow -->
-  <div class="glow"></div>
-
-  <!-- Floating hearts -->
-  <template x-for="heart in floatingHearts" :key="heart.id">
-    <div class="floating-heart"
-         :style="`left: ${heart.x}%; animation-duration: ${heart.duration}s; animation-delay: ${heart.delay}s; font-size: ${heart.size}rem;`">
-      ♥
-    </div>
-  </template>
-
-  <!-- Greeting -->
-  <div class="greeting">
-    <h1>Happy Valentine's Day</h1>
-    <p>With all my love</p>
-  </div>
-
-  <!-- Bouquet -->
-  <div class="bouquet">
-
-    <!-- Stems -->
-    <template x-for="(stem, i) in stems" :key="'stem-'+i">
-      <div class="stem"
-           :style="`
+      <!-- Bouquet -->
+      <div class="bouquet">
+        <!-- Stems -->
+        <template x-for="(stem, i) in stems" :key="'stem-'+i">
+          <div
+            class="stem"
+            :style="`
              height: ${stem.height}px;
              transform: translateX(-50%) rotate(${stem.angle}deg);
              left: calc(50% + ${stem.offsetX}px);
              animation-delay: ${0.2 + i * 0.1}s;
-           `">
-        <template x-if="stem.leaf">
-          <div class="leaf" :class="stem.leafSide"
-               :style="`bottom: ${stem.leafPos}%; ${stem.leafSide === 'right' ? 'left: 4px' : 'right: 4px'};`">
+           `"
+          >
+            <template x-if="stem.leaf">
+              <div
+                class="leaf"
+                :class="stem.leafSide"
+                :style="`bottom: ${stem.leafPos}%; ${stem.leafSide === 'right' ? 'left: 4px' : 'right: 4px'};`"
+              ></div>
+            </template>
           </div>
         </template>
-      </div>
-    </template>
 
-    <!-- Roses (SVG) -->
-    <template x-for="(rose, i) in roses" :key="'rose-'+i">
-      <div class="flower"
-           :style="`
+        <!-- Roses (SVG) -->
+        <template x-for="(rose, i) in roses" :key="'rose-'+i">
+          <div
+            class="flower"
+            :style="`
              top: ${rose.y}px;
              left: calc(50% + ${rose.x}px - 35px);
              animation-delay: ${0.8 + i * 0.2}s;
            `"
-           @click="burstSparkles(rose, $event)">
-        <svg class="rose-svg" width="70" height="70" viewBox="0 0 70 70">
-          <!-- Outer petals -->
-          <ellipse cx="35" cy="25" rx="28" ry="22" :fill="rose.colorOuter" opacity="0.8" transform="rotate(0,35,35)"/>
-          <ellipse cx="20" cy="35" rx="22" ry="18" :fill="rose.colorOuter" opacity="0.75" transform="rotate(-30,35,35)"/>
-          <ellipse cx="50" cy="35" rx="22" ry="18" :fill="rose.colorOuter" opacity="0.75" transform="rotate(30,35,35)"/>
-          <ellipse cx="35" cy="48" rx="25" ry="18" :fill="rose.colorOuter" opacity="0.7" transform="rotate(0,35,35)"/>
-          <!-- Mid petals -->
-          <ellipse cx="30" cy="30" rx="18" ry="14" :fill="rose.colorMid" opacity="0.85" transform="rotate(-15,35,35)"/>
-          <ellipse cx="42" cy="30" rx="18" ry="14" :fill="rose.colorMid" opacity="0.85" transform="rotate(20,35,35)"/>
-          <ellipse cx="35" cy="42" rx="16" ry="12" :fill="rose.colorMid" opacity="0.8"/>
-          <!-- Inner petals -->
-          <ellipse cx="33" cy="33" rx="12" ry="10" :fill="rose.colorInner" opacity="0.9" transform="rotate(-10,35,35)"/>
-          <ellipse cx="38" cy="34" rx="12" ry="10" :fill="rose.colorInner" opacity="0.9" transform="rotate(15,35,35)"/>
-          <!-- Center spiral -->
-          <circle cx="35" cy="34" r="7" :fill="rose.colorCenter" opacity="0.95"/>
-          <path d="M35,30 Q38,32 36,36 Q33,38 32,34 Q31,31 35,30" fill="none" :stroke="rose.colorDeep" stroke-width="1.5" opacity="0.6"/>
-        </svg>
-      </div>
-    </template>
+            @click="burstSparkles(rose, $event)"
+          >
+            <svg class="rose-svg" width="70" height="70" viewBox="0 0 70 70">
+              <!-- Outer petals -->
+              <ellipse
+                cx="35"
+                cy="25"
+                rx="28"
+                ry="22"
+                :fill="rose.colorOuter"
+                opacity="0.8"
+                transform="rotate(0,35,35)"
+              />
+              <ellipse
+                cx="20"
+                cy="35"
+                rx="22"
+                ry="18"
+                :fill="rose.colorOuter"
+                opacity="0.75"
+                transform="rotate(-30,35,35)"
+              />
+              <ellipse
+                cx="50"
+                cy="35"
+                rx="22"
+                ry="18"
+                :fill="rose.colorOuter"
+                opacity="0.75"
+                transform="rotate(30,35,35)"
+              />
+              <ellipse
+                cx="35"
+                cy="48"
+                rx="25"
+                ry="18"
+                :fill="rose.colorOuter"
+                opacity="0.7"
+                transform="rotate(0,35,35)"
+              />
+              <!-- Mid petals -->
+              <ellipse
+                cx="30"
+                cy="30"
+                rx="18"
+                ry="14"
+                :fill="rose.colorMid"
+                opacity="0.85"
+                transform="rotate(-15,35,35)"
+              />
+              <ellipse
+                cx="42"
+                cy="30"
+                rx="18"
+                ry="14"
+                :fill="rose.colorMid"
+                opacity="0.85"
+                transform="rotate(20,35,35)"
+              />
+              <ellipse
+                cx="35"
+                cy="42"
+                rx="16"
+                ry="12"
+                :fill="rose.colorMid"
+                opacity="0.8"
+              />
+              <!-- Inner petals -->
+              <ellipse
+                cx="33"
+                cy="33"
+                rx="12"
+                ry="10"
+                :fill="rose.colorInner"
+                opacity="0.9"
+                transform="rotate(-10,35,35)"
+              />
+              <ellipse
+                cx="38"
+                cy="34"
+                rx="12"
+                ry="10"
+                :fill="rose.colorInner"
+                opacity="0.9"
+                transform="rotate(15,35,35)"
+              />
+              <!-- Center spiral -->
+              <circle
+                cx="35"
+                cy="34"
+                r="7"
+                :fill="rose.colorCenter"
+                opacity="0.95"
+              />
+              <path
+                d="M35,30 Q38,32 36,36 Q33,38 32,34 Q31,31 35,30"
+                fill="none"
+                :stroke="rose.colorDeep"
+                stroke-width="1.5"
+                opacity="0.6"
+              />
+            </svg>
+          </div>
+        </template>
 
-    <!-- Baby's breath filler flowers -->
-    <template x-for="(bb, i) in babysBreath" :key="'bb-'+i">
-      <div class="babys-breath"
-           :style="`top: ${bb.y}px; left: calc(50% + ${bb.x}px); animation-delay: ${1.5 + i * 0.1}s;`">
-        <div class="tiny-flower" style="top: 0; left: 0;"></div>
-        <div class="tiny-flower" style="top: -6px; left: 8px;"></div>
-        <div class="tiny-flower" style="top: 4px; left: 10px;"></div>
-      </div>
-    </template>
+        <!-- Baby's breath filler flowers -->
+        <template x-for="(bb, i) in babysBreath" :key="'bb-'+i">
+          <div
+            class="babys-breath"
+            :style="`top: ${bb.y}px; left: calc(50% + ${bb.x}px); animation-delay: ${1.5 + i * 0.1}s;`"
+          >
+            <div class="tiny-flower" style="top: 0; left: 0"></div>
+            <div class="tiny-flower" style="top: -6px; left: 8px"></div>
+            <div class="tiny-flower" style="top: 4px; left: 10px"></div>
+          </div>
+        </template>
 
-    <!-- Sparkle particles on click -->
-    <template x-for="spark in sparkles" :key="spark.id">
-      <div class="sparkle"
-           :style="`top: ${spark.y}px; left: ${spark.x}px; animation-delay: ${spark.delay}s; background: ${spark.color};`">
-      </div>
-    </template>
+        <!-- Sparkle particles on click -->
+        <template x-for="spark in sparkles" :key="spark.id">
+          <div
+            class="sparkle"
+            :style="`top: ${spark.y}px; left: ${spark.x}px; animation-delay: ${spark.delay}s; background: ${spark.color};`"
+          ></div>
+        </template>
 
-    <!-- Wrapper -->
-    <div class="wrapper">
-      <div class="wrapper-shape"></div>
-      <div class="wrapper-fold"></div>
-      <div class="wrapper-ribbon">
-        <div class="ribbon-band"></div>
-        <div class="ribbon-bow">
-          <div class="ribbon-center"></div>
+        <!-- Wrapper -->
+        <div class="wrapper">
+          <div class="wrapper-shape"></div>
+          <div class="wrapper-fold"></div>
+          <div class="wrapper-ribbon">
+            <div class="ribbon-band"></div>
+            <div class="ribbon-bow">
+              <div class="ribbon-center"></div>
+            </div>
+          </div>
         </div>
       </div>
+
+      <!-- Message card -->
+      <div class="message-card">
+        <p>You make every day feel like Valentine's Day</p>
+        <div class="heart-icon">❤️</div>
+      </div>
+
+      <div class="hint">~ tap a rose ~</div>
     </div>
-  </div>
-
-  <!-- Message card -->
-  <div class="message-card">
-    <p>You make every day feel like Valentine's Day</p>
-    <div class="heart-icon">❤️</div>
-  </div>
-
-  <div class="hint">~ tap a rose ~</div>
-</div>
-
-<script>
-function bouquet() {
-  return {
-    roses: [],
-    stems: [],
-    babysBreath: [],
-    floatingHearts: [],
-    sparkles: [],
-    sparkleId: 0,
-
-    init() {
-      this.createRoses();
-      this.createStems();
-      this.createBabysBreath();
-      this.createFloatingHearts();
-    },
-
-    createRoses() {
-      const roseColors = [
-        { colorOuter: '#C41E3A', colorMid: '#D94255', colorInner: '#E8556D', colorCenter: '#8B0A1A', colorDeep: '#6B0515' },
-        { colorOuter: '#E8556D', colorMid: '#F06E82', colorInner: '#F78DA7', colorCenter: '#C41E3A', colorDeep: '#9B1228' },
-        { colorOuter: '#B8173A', colorMid: '#D43A55', colorInner: '#E8556D', colorCenter: '#7A0818', colorDeep: '#5A0410' },
-        { colorOuter: '#D44060', colorMid: '#E86080', colorInner: '#F4A0B0', colorCenter: '#AA2040', colorDeep: '#881830' },
-        { colorOuter: '#F4A0B0', colorMid: '#F7B8C4', colorInner: '#FDE2E8', colorCenter: '#E8556D', colorDeep: '#C44060' },
-        { colorOuter: '#C82848', colorMid: '#DC4862', colorInner: '#EC6880', colorCenter: '#981830', colorDeep: '#781020' },
-        { colorOuter: '#E06878', colorMid: '#EC8898', colorInner: '#F4A8B4', colorCenter: '#C44860', colorDeep: '#A03848' },
-        { colorOuter: '#A01030', colorMid: '#C02848', colorInner: '#D84868', colorCenter: '#700820', colorDeep: '#500615' },
-        { colorOuter: '#DC3050', colorMid: '#E85070', colorInner: '#F48098', colorCenter: '#B02040', colorDeep: '#901830' },
-        { colorOuter: '#F08098', colorMid: '#F4A0B0', colorInner: '#F8C0CC', colorCenter: '#D06078', colorDeep: '#B04860' },
-        { colorOuter: '#CC2040', colorMid: '#E04060', colorInner: '#F06080', colorCenter: '#A01830', colorDeep: '#801020' },
-        { colorOuter: '#E86880', colorMid: '#F08898', colorInner: '#F4A8B8', colorCenter: '#CC4860', colorDeep: '#AA3850' },
-      ];
-
-      // 12 roses arranged in 4 rows: 2 top, 3 upper-mid, 4 mid, 3 bottom
-      const positions = [
-        // Top row (2)
-        { x: -25, y: 60 },  { x: 30, y: 55 },
-        // Upper-mid row (3)
-        { x: -70, y: 95 },  { x: 0, y: 85 },   { x: 65, y: 95 },
-        // Mid row (4)
-        { x: -105, y: 135 }, { x: -40, y: 125 }, { x: 35, y: 120 }, { x: 100, y: 138 },
-        // Lower row (3)
-        { x: -80, y: 168 }, { x: -10, y: 160 }, { x: 65, y: 170 },
-      ];
-
-      this.roses = positions.map((pos, i) => ({
-        ...pos,
-        ...roseColors[i % roseColors.length],
-      }));
-    },
-
-    createStems() {
-      const stemData = [
-        // Top row stems
-        { height: 310, angle: -6,  offsetX: -25, leaf: true,  leafSide: 'left',  leafPos: 45 },
-        { height: 315, angle: 5,   offsetX: 30,  leaf: true,  leafSide: 'right', leafPos: 50 },
-        // Upper-mid row stems
-        { height: 280, angle: -18, offsetX: -70, leaf: true,  leafSide: 'left',  leafPos: 40 },
-        { height: 290, angle: -2,  offsetX: 0,   leaf: true,  leafSide: 'right', leafPos: 55 },
-        { height: 280, angle: 16,  offsetX: 65,  leaf: true,  leafSide: 'right', leafPos: 38 },
-        // Mid row stems
-        { height: 245, angle: -28, offsetX: -105, leaf: false },
-        { height: 255, angle: -12, offsetX: -40,  leaf: true, leafSide: 'left',  leafPos: 50 },
-        { height: 260, angle: 10,  offsetX: 35,   leaf: false },
-        { height: 240, angle: 26,  offsetX: 100,  leaf: true, leafSide: 'right', leafPos: 42 },
-        // Lower row stems
-        { height: 215, angle: -22, offsetX: -80, leaf: true,  leafSide: 'left',  leafPos: 48 },
-        { height: 220, angle: -4,  offsetX: -10, leaf: false },
-        { height: 210, angle: 18,  offsetX: 65,  leaf: true,  leafSide: 'right', leafPos: 45 },
-      ];
-      this.stems = stemData;
-    },
-
-    createBabysBreath() {
-      const positions = [
-        { x: -130, y: 115 }, { x: -100, y: 80 }, { x: 95, y: 85 },
-        { x: 130, y: 120 },  { x: -60, y: 55 },  { x: 55, y: 50 },
-        { x: -120, y: 170 }, { x: 125, y: 175 },  { x: 0, y: 45 },
-        { x: -40, y: 100 },  { x: 45, y: 105 },   { x: -85, y: 155 },
-        { x: 80, y: 160 },   { x: -15, y: 185 },  { x: 110, y: 150 },
-      ];
-      this.babysBreath = positions;
-    },
-
-    createFloatingHearts() {
-      this.floatingHearts = Array.from({ length: 20 }, (_, i) => ({
-        id: i,
-        x: Math.random() * 100,
-        duration: 8 + Math.random() * 12,
-        delay: Math.random() * 15,
-        size: 0.6 + Math.random() * 1,
-      }));
-    },
-
-    burstSparkles(rose, event) {
-      const rect = event.currentTarget.getBoundingClientRect();
-      const parentRect = event.currentTarget.closest('.bouquet').getBoundingClientRect();
-      const cx = rect.left - parentRect.left + rect.width / 2;
-      const cy = rect.top - parentRect.top + rect.height / 2;
-
-      const colors = ['#D4A843', '#E8C872', '#F4A0B0', '#fff', '#C41E3A'];
-
-      for (let i = 0; i < 12; i++) {
-        const angle = (Math.PI * 2 * i) / 12;
-        const dist = 20 + Math.random() * 30;
-        this.sparkles.push({
-          id: this.sparkleId++,
-          x: cx + Math.cos(angle) * dist,
-          y: cy + Math.sin(angle) * dist,
-          delay: Math.random() * 0.3,
-          color: colors[Math.floor(Math.random() * colors.length)],
-        });
-      }
-
-      setTimeout(() => {
-        this.sparkles = this.sparkles.slice(-24);
-      }, 2500);
-    },
-  };
-}
-</script>
-</body>
+  </body>
 </html>
