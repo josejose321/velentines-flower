@@ -485,12 +485,12 @@ svg.rose-svg:hover {
 }
 
 .tiny-flower {
-  width: 8px;
-  height: 8px;
-  background: white;
+  width: 10px;
+  height: 10px;
+  background: radial-gradient(circle at 40% 35%, #E8556D, #C41E3A 50%, #8B0A1A);
   border-radius: 50%;
   position: absolute;
-  box-shadow: 0 0 6px rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 6px rgba(196, 30, 58, 0.5);
 }
 
 @media (max-width: 640px) {
