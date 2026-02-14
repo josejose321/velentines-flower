@@ -10,7 +10,7 @@ function bouquet() {
     // JOSEEEEE
     init() {
       this.createStemsAndRoses();
-      this.createBabysBreath();
+      // this.createBabysBreath();
       this.createFloatingHearts();
     },
 
@@ -90,12 +90,12 @@ function bouquet() {
     },
 
     createFloatingHearts() {
-      this.floatingHearts = Array.from({ length: 20 }, (_, i) => ({
+      this.floatingHearts = Array.from({ length: 30 }, (_, i) => ({
         id: i,
         x: Math.random() * 100,
         duration: 8 + Math.random() * 12,
         delay: Math.random() * 15,
-        size: 0.6 + Math.random() * 1,
+        size: 8.6 + Math.random() * 1,
       }));
     },
 
